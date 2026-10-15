@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>網頁自動化測試練習場</title>
+<style>
+  :root {
+    --bg: #f5f7fa; --card: #ffffff; --text: #1f2933; --muted: #616e7c;
+    --primary: #2563eb; --border: #d9e2ec; --ok: #15803d; --err: #b91c1c;
+    --tip-bg: #eff6ff; --tip-border: #93c5fd; --code-bg: #f1f5f9;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+         background: var(--bg); color: var(--text); line-height: 1.6; }
+  header { background: #1e3a8a; color: #fff; padding: 24px 16px; }
+  header h1 { margin: 0 0 6px; font-size: 1.6rem; }
+  header p { margin: 0; opacity: .9; }
+  .layout { display: flex; max-width: 1200px; margin: 0 auto; gap: 20px; padding: 20px 16px; }
+  nav#toc { position: sticky; top: 16px; align-self: flex-start; width: 220px; flex-shrink: 0;
+            background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+  nav#toc h2 { font-size: 1rem; margin: 0 0 8px; }
+  nav#toc ol { margin: 0; padding-left: 20px; font-size: .9rem; }
+  nav#toc a { color: var(--primary); text-decoration: none; }
+  main { flex: 1; min-width: 0; }
+  section.block { background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+                  padding: 18px 20px; margin-bottom: 20px; }
+  section.block > h2 { margin-top: 0; font-size: 1.25rem; border-bottom: 2px solid var(--border); padding-bottom: 6px; }
+  .level { display: inline-block; font-size: .75rem; padding: 2px 8px; border-radius: 10px; margin-left: 8px; vertical-align: middle; }
+  .easy { background: #dcfce7; color: #166534; } .mid { background: #fef9c3; color: #854d0e; } .hard { background: #fee2e2; color: #991b1b; }
+  .howto { background: var(--tip-bg); border-left: 4px solid var(--tip-border); padding: 10px 14px; margin: 10px 0 16px; font-size: .92rem; border-radius: 4px; }
+  .howto b { display: block; margin-bottom: 4px; }
+  .howto ol, .howto ul { margin: 4px 0; padding-left: 22px; }
+  .practice { background: #fff7ed; border-left: 4px solid #fdba74; padding: 10px 14px; margin: -6px 0 16px; font-size: .92rem; border-radius: 4px; }
+  .practice b { display: block; margin-bottom: 4px; }
+  .practice ol { margin: 4px 0; padding-left: 22px; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; font-size: .88em; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 8px 0; }
+  label { font-weight: 500; }
+  input[type=text], input[type=password], input[type=email], input[type=number], input[type=date], select, textarea {
+    padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: .95rem; font-family: inherit; }
+  textarea { width: 100%; min-height: 70px; }
+  button, .btn { padding: 7px 14px; border: 1px solid var(--primary); background: var(--primary); color: #fff;
+                 border-radius: 6px; cursor: pointer; font-size: .95rem; font-family: inherit; }
+  button.secondary { background: #fff; color: var(--primary); }
+  button:disabled { background: #cbd5e1; border-color: #cbd5e1; cursor: not-allowed; }
+  .result { margin-top: 10px; padding: 8px 12px; background: var(--code-bg); border-radius: 6px; min-height: 2.2em; font-family: Consolas, monospace; font-size: .9rem; white-space: pre-wrap; }
+  .ok { color: var(--ok); } .err { color: var(--err); }
+  table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+  th, td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; }
+  th { background: var(--code-bg); cursor: pointer; user-select: none; }
+  .hidden { display: none !important; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .box { border: 1px dashed var(--border); border-radius: 6px; padding: 12px; }
+  /* hover */
+  .menu { position: relative; display: inline-block; }
+  .menu-list { display: none; position: absolute; top: 100%; left: 0; background: #fff; border: 1px solid var(--border);
+               border-radius: 6px; min-width: 160px; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,.1); }
+  .menu:hover .menu-list { display: block; }
+  .menu-list a { display: block; padding: 8px 12px; color: var(--text); text-decoration: none; }
+  .menu-list a:hover { background: var(--tip-bg); }
+  .tooltip-target { border-bottom: 1px dotted; cursor: help; position: relative; }
+  .tooltip-target .tip { visibility: hidden; position: absolute; bottom: 125%; left: 0; background: #111827; color: #fff; padding: 4px 8px; border-radius: 4px; white-space: nowrap; font-size: .8rem; }
+  .tooltip-target:hover .tip { visibility: visible; }
+  /* drag */
+  .drag-item { display: inline-block; padding: 8px 14px; background: #fde68a; border-radius: 6px; cursor: grab; margin: 4px; }
+  .dropzone { min-height: 90px; border: 2px dashed #94a3b8; border-radius: 8px; padding: 8px; }
+  .dropzone.over { background: #e0f2fe; }
+  .sortable li { padding: 6px 10px; margin: 4px 0; background: #e2e8f0; border-radius: 4px; cursor: grab; list-style: none; }
+  .sortable { padding: 0; }
+  /* modal */
+  .modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center; z-index: 100; }
+  .modal { background: #fff; border-radius: 8px; padding: 20px; width: min(420px, 90vw); }
+  .spinner { display: inline-block; width: 18px; height: 18px; border: 3px solid #cbd5e1; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; vertical-align: middle; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .scroll-box { height: 160px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; padding: 8px; }
+  .scroll-box .item { padding: 6px; border-bottom: 1px solid #eef2f7; }
+  .card-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+  .product { border: 1px solid var(--border); border-radius: 6px; padding: 10px; }
+  .product .name { font-weight: 600; } .product .price { color: var(--err); }
+  .toast { position: fixed; bottom: 20px; right: 20px; background: #111827; color: #fff; padding: 10px 16px; border-radius: 6px; z-index: 200; }
+  .tabs-nav button { border-radius: 6px 6px 0 0; }
+  .tabs-nav button.active { background: #fff; color: var(--primary); }
+  .tab-panel { border: 1px solid var(--border); padding: 12px; border-radius: 0 6px 6px 6px; }
+  footer { text-align: center; color: var(--muted); padding: 20px; font-size: .85rem; }
+  @media (max-width: 860px) { .layout { flex-direction: column; } nav#toc { position: static; width: 100%; } .grid2 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<!-- ===================== 新分頁模式：網址帶 ?page=xxx 時顯示子頁面 ===================== -->
+<div id="subpage-root" class="hidden"></div>
+
+<div id="main-root">
+<header>
+  <h1 id="page-title">網頁自動化測試練習場</h1>
+  <p>給自動化測試工程師練習 Selenium、Playwright、Cypress 等工具的單頁練習網站。每個區塊都標示了難度並附上操作說明與練習題。</p>
+</header>
+
+<div class="layout">
+  <nav id="toc">
+    <h2>目錄</h2>
+    <ol>
+      <li><a href="#sec-login">登入表單</a></li>
+      <li><a href="#sec-inputs">各式輸入框</a></li>
+      <li><a href="#sec-choice">下拉、單選、核取</a></li>
+      <li><a href="#sec-tabs">頁籤切換</a></li>
+      <li><a href="#sec-buttons">按鈕與點擊</a></li>
+      <li><a href="#sec-keyboard">鍵盤事件</a></li>
+      <li><a href="#sec-upload">檔案上傳</a></li>
+      <li><a href="#sec-table">動態表格</a></li>
+      <li><a href="#sec-dialog">瀏覽器對話框</a></li>
+      <li><a href="#sec-modal">自訂彈窗</a></li>
+      <li><a href="#sec-wait">等待與動態載入</a></li>
+      <li><a href="#sec-hover">滑鼠懸停</a></li>
+      <li><a href="#sec-scroll">捲動與無限載入</a></li>
+      <li><a href="#sec-newtab">新分頁與新視窗</a></li>
+      <li><a href="#sec-hard">難定位元件</a></li>
+      <li><a href="#sec-drag">拖曳</a></li>
+      <li><a href="#sec-iframe">iframe</a></li>
+      <li><a href="#sec-shadow">Shadow DOM</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+  <!-- 1. 登入表單 -->
+  <section class="block" id="sec-login">
+    <h2>1. 登入表單 <span class="level easy">簡單</span></h2>
+    <div class="howto">
+      <b>操作說明</b>
+      所有元件都有 <code>id</code>，最適合入門練習。
+      <ol>
+        <li>帳號輸入 <code>admin</code>、密碼輸入 <code>123456</code>，按「登入」會顯示「登入成功」。</li>
+        <li>其他組合會顯示錯誤訊息；任一欄位空白會顯示「請輸入帳號與密碼」。</li>
+        <li>勾選「記住我」後登入，結果會多一行「已記住帳號」。</li>
+      </ol>
+    </div>
+    <div class="practice">
+      <b>練習題</b>
+      <ol>
+        <li>輸入 <code>admin</code> / <code>123456</code> 登入，驗證 <code>#login-result</code> 顯示「登入成功，歡迎 admin」。</li>
+        <li>輸入錯誤密碼，驗證顯示「帳號或密碼錯誤」。</li>
+        <li>帳號或密碼留空按登入，驗證顯示「請輸入帳號與密碼」。</li>
+        <li>勾選「記住我」再登入，驗證結果多一行「已記住帳號」。</li>
+      </ol>
+    </div>
+    <form id="login-form" autocomplete="off" onsubmit="return false;">
+      <div class="row"><label for="username">帳號：</label><input type="text" id="username" name="username" placeholder="請輸入帳號"></div>
+      <div class="row"><label for="password">密碼：</label><input type="password" id="password" name="password" placeholder="請輸入密碼"></div>
+      <div class="row"><input type="checkbox" id="remember-me"><label for="remember-me">記住我</label></div>
+      <div class="row">
+        <button type="submit" id="login-btn">登入</button>
+        <button type="reset" id="reset-btn" class="secondary">清除</button>
+      </div>
+    </form>
+    <div class="result" id="login-result" data-testid="login-result"></div>
+  </section>
+
+  <!-- 2. 各式輸入框 -->
+  <section class="block" id="sec-inputs">
+    <h2>2. 各式輸入框 <span class="level easy">簡單</span></h2>
+    <div class="howto">
+      <b>操作說明</b>
+      <ol>
+        <li>在各欄位輸入資料後按「送出資料」，下方會以 JSON 顯示所有欄位值。</li>
+        <li>Email 格式錯誤、年齡不在 1~120 之間時會出現紅字錯誤訊息。</li>
+        <li>「唯讀欄位」無法輸入，「停用欄位」無法聚焦，可練習驗證元件狀態（<code>is_enabled()</code>、<code>readonly</code> 屬性）。</li>
+        <li>「即時字數」欄位每輸入一個字，旁邊的計數會即時更新。</li>
+      </ol>
+    </div>
+    <div class="practice">
+      <b>練習題</b>
+      <ol>
+        <li>用 <code>clear()</code> 清空「姓名」的預設值後輸入新姓名，送出後驗證 JSON 中的姓名。</li>
+        <li>Email 輸入 <code>abc</code>，驗證出現「Email 格式錯誤」。</li>
+        <li>年齡輸入 <code>200</code>，驗證出現「年齡必須介於 1 到 120」。</li>
+        <li>讀取唯讀欄位的 <code>value</code> 並驗證為 <code>TEST-READONLY-001</code>；驗證停用欄位 <code>is_enabled()</code> 為 false。</li>
+        <li>在「即時字數」輸入 5 個字，驗證計數顯示「5 / 20」。</li>
+      </ol>
+    </div>
+    <div class="grid2">
+      <div>
+        <div class="row"><label for="input-name">姓名：</label><input type="text" id="input-name" value="預設姓名"></div>
+        <div class="row"><label for="input-email">Email：</label><input type="email" id="input-email" placeholder="name@example.com"></div>
+        <div class="row"><label for="input-age">年齡：</label><input type="number" id="input-age" min="1" max="120"></div>
+        <div class="row"><label for="input-date">生日：</label><input type="date" id="input-date"></div>
+      </div>
+      <div>
+        <div class="row"><label for="input-readonly">唯讀欄位：</label><input type="text" id="input-readonly" value="TEST-READONLY-001" readonly></div>
+        <div class="row"><label for="input-disabled">停用欄位：</label><input type="text" id="input-disabled" value="無法編輯" disabled></div>
+        <div class="row"><label for="input-counter">即時字數：</label><input type="text" id="input-counter" maxlength="20"> <span id="counter-display">0 / 20</span></div>
+      </div>
+    </div>
+    <label for="input-comment">備註：</label>
+    <textarea id="input-comment" placeholder="可輸入多行文字"></textarea>
+    <div class="row"><button id="submit-inputs">送出資料</button></div>
+    <div class="result" id="inputs-result"></div>
+  </section>
+
+  <!-- 3. 下拉、單選、核取 -->
+  <section class="block" id="sec-choice">
+    <h2>3. 下拉選單、單選、核取方塊 <span class="level easy">簡單</span></h2>
+    <div class="howto">
+      <b>操作說明</b>
+      <ol>
+        <li>「城市」為原生 <code>&lt;select&gt;</code>，可用 Select 類別依文字、value 或 index 選取。</li>
+        <li>「程式語言」為可複選的 <code>&lt;select multiple&gt;</code>。</li>
+        <li>先選「國家」，「城市（連動）」才會出現對應選項，可練習連動選單的等待。</li>
+        <li>「自訂下拉」不是原生 select，需先點開再點選項目。</li>
+        <li>按「確認選擇」顯示目前所有選取結果。</li>
+      </ol>
+    </div>
+    <div class="practice">
+      <b>練習題</b>
+      <ol>
+        <li>驗證「城市」預設選取的是「高雄」。</li>
+        <li>依文字選取「台中」、依 value 選取 <code>tpe</code>，各自讀回並驗證。</li>
+        <li>在「程式語言」同時選取 Python 與 Java，按「確認選擇」驗證結果。</li>
+        <li>選「日本」後等待連動選單啟用，再選「大阪」並驗證。</li>
+        <li>選取性別「女」、勾選「閱讀」，驗證 <code>is_selected()</code>；驗證「停用選項」無法勾選。</li>
+        <li>從自訂下拉選取「芒果」，驗證結果顯示「水果：芒果」。</li>
+      </ol>
+    </div>
+    <div class="grid2">
+      <div>
+        <div class="row"><label for="select-city">城市：</label>
+          <select id="select-city" name="city">
+            <option value="">-- 請選擇 --</option>
+            <option value="tpe">台北</option>
+            <option value="txg">台中</option>
+            <option value="khh" selected>高雄</option>
+            <option value="hsz">新竹</option>
+          </select>
+        </div>
+        <div class="row"><label for="select-lang">程式語言（可複選）：</label>
+          <select id="select-lang" multiple size="4">
+            <option value="python">Python</option>
+            <option value="java">Java</option>
+            <option value="js">JavaScript</option>
+            <option value="csharp">C#</option>
+          </select>
+        </div>
+        <div class="row"><label for="select-country">國家：</label>
+          <select id="select-country">
+            <option value="">-- 請選擇 --</option>
+            <option value="tw">台灣</option>
+            <option value="jp">日本</option>
+            <option value="us">美國</option>
+          </select>
+          <label for="select-sub-city">城市（連動）：</label>
+          <select id="select-sub-city" disabled><option value="">-- 先選國家 --</option></select>
+        </div>
+      </div>
+      <div>
+        <p><b>性別（單選）：</b></p>
+        <div class="row">
+          <input type="radio" id="radio-male" name="gender" value="male"><label for="radio-male">男</label>
+          <input type="radio" id="radio-female" name="gender" value="female"><label for="radio-female">女</label>
+          <input type="radio" id="radio-other" name="gender" value="other"><label for="radio-other">其他</label>
+        </div>
+        <p><b>興趣（核取）：</b></p>
+        <div class="row">
+          <input type="checkbox" id="hobby-read" name="hobby" value="閱讀"><label for="hobby-read">閱讀</label>
+          <input type="checkbox" id="hobby-sport" name="hobby" value="運動" checked><label for="hobby-sport">運動</label>
+          <input type="checkbox" id="hobby-music" name="hobby" value="音樂"><label for="hobby-music">音樂</label>
+          <input type="checkbox" id="hobby-disabled" name="hobby" value="停用選項" disabled><label for="hobby-disabled">停用選項</label>
+        </div>
+        <p><b>自訂下拉：</b></p>
+        <div class="custom-select" id="custom-select" style="position:relative; display:inline-block;">
+          <div class="custom-select-trigger" id="custom-select-trigger" style="border:1px solid var(--border); padding:7px 12px; border-radius:6px; min-width:160px; cursor:pointer; background:#fff;">請選擇水果 ▾</div>
+          <ul class="custom-options hidden" style="position:absolute; left:0; right:0; margin:2px 0 0; padding:0; list-style:none; background:#fff; border:1px solid var(--border); border-radius:6px; z-index:5;">
+            <li class="custom-option" data-value="apple" style="padding:6px 12px; cursor:pointer;">蘋果</li>
+            <li class="custom-option" data-value="banana" style="padding:6px 12px; cursor:pointer;">香蕉</li>
+            <li class="custom-option" data-value="mango" style="padding:6px 12px; cursor:pointer;">芒果</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="row"><button id="confirm-choice">確認選擇</button></div>
+    <div class="result" id="choice-result"></div>
+  </section>
+
+  <!-- 4. 頁籤 -->
+  <section class="block" id="sec-tabs">
+    <h2>4. 頁籤切換與摺疊面板 <span class="level easy">簡單</span></h2>
+    <div class="howto">
+      <b>操作說明</b>
+      <ol>
+        <li>點擊頁籤會切換顯示的內容，非作用中的面板是隱藏的（練習驗證可見性）。</li>
+        <li>「常見問題」使用原生 <code>&lt;details&gt;</code>，點擊標題展開，驗證 <code>open</code> 屬性。</li>
+      </ol>
+    </div>
+    <div class="practice">
+      <b>練習題</b>
+      <ol>
+        <li>點擊「工作經歷」頁籤，驗證 <code>#tab-2</code> 可見且 <code>#tab-1</code> 被隱藏。</li>
+        <li>驗證作用中頁籤的 <code>aria-selected</code> 為 <code>true</code>。</li>
+        <li>切到「設定」頁籤並勾選「接收通知」。</li>
+        <li>展開第一個常見問題，驗證 <code>#faq-1</code> 具有 <code>open</code> 屬性。</li>
+      </ol>
+    </div>
+    <div class="tabs-nav row" role="tablist" style="margin-bottom:0;">
+      <button role="tab" class="tab-btn active" data-tab="tab-1" aria-selected="true">基本資料</button>
+      <button role="tab" class="tab-btn" data-tab="tab-2" aria-selected="false">工作經歷</button>
+      <button role="tab" class="tab-btn" data-tab="tab-3" aria-selected="false">設定</button>
+    </div>
+    <div class="tab-panel" id="tab-1" role="tabpanel">這是「基本資料」頁籤的內容。</div>
+    <div class="tab-panel hidden" id="tab-2" role="tabpanel">這是「工作經歷」頁籤的內容：2020–2024 測試工程師。</div>
+    <div class="tab-panel hidden" id="tab-3" role="tabpanel">這是「設定」頁籤的內容。<label><input type="checkbox" id="setting-notify"> 接收通知</label></div>
+    <details id="faq-1" style="margin-top:12px;"><summary>常見問題：這個網站會儲存資料嗎？</summary><p>不會，所有資料只存在目前頁面，重新整理即消失。</p></details>
+    <details id="faq-2"><summary>常見問題：可以用哪些工具練習？</summary><p>Selenium、Playwright、Cypress、Puppeteer、Robot Framework 等皆可。</p></details>
+  </section>
+
+  <!-- 5. 按鈕與點擊 -->
+  <section class="block" id="sec-buttons">
+    <h2>5. 按鈕與點擊事件 <span class="level mid">中等</span></h2>
+    <div class="howto">
+      <b>操作說明</b>
+      <ol>
+        <li>「單擊」、「雙擊」、「右鍵」三個按鈕分別只回應對應的滑鼠動作（可練習 ActionChains / <code>dblclick()</code> / <code>click(button='right')</code>）。</li>
+        <li>「計數器」每按一次 +1，可練習點擊 N 次後驗證數字。</li>
+        <li>「3 秒後啟用」按鈕一開始是停用的，按「開始倒數」後 3 秒才能點擊，需使用明確等待。</li>
+        <li>「被遮住的按鈕」上面蓋了一層半透明遮罩，直接點擊會被攔截（ElementClickInterceptedException），請先按「移除遮罩」。</li>
+      </ol>
+    </div>
+    <div class="practice">
+      <b>練習題</b>
+      <ol>
+        <li>分別對三個按鈕執行單擊、雙擊、右鍵，驗證每次的結果文字。</li>
+        <li>點擊「計數器 +1」五次，驗證 <code>#counter-value</code> 為 5，再按歸零驗證為 0。</li>
+        <li>按「開始倒數」後用明確等待等到「3 秒後啟用」可點擊，點擊並驗證結果。</li>
+        <li>直接點「被遮住的按鈕」觀察例外，移除遮罩後再點擊並驗證結果。</li>
+      </ol>
+    </div>
+    <div class="row">
+      <button id="btn-single">單擊我</button>
+      <button id="btn-double">雙擊我</button>
+      <button id="btn-right">右鍵點我</button>
+    </div>
+    <div class="row">
+      <button id="btn-counter">計數器 +1</button>
+      <span>目前次數：<strong id="counter-value">0</strong></span>
+      <button id="btn-counter-reset" class="secondary">歸零</button>
+    </div>
+    <div class="row">
+      <button id="btn-start-countdown" class="secondary">開始倒數</button>
+      <button id="btn-delayed" disabled>3 秒後啟用</button>
+      <span id="countdown-text"></span>
+    </div>
+    <div class="row">
+      <div style="position:relative; display:inline-block;">
+        <button id="btn-covered">被遮住的按鈕</button>
+        <div id="overlay-cover" style="position:absolute; inset:-4px; background:rgba(148,163,184,.55); border-radius:6px;"></div>
+      </div>
+      <button id="btn-remove-overlay" class="secondary">移除遮罩</button>
+    </div>
+    <div class="result" id="buttons-result"></div>
+  </section>
+
+  <!-- 6. 鍵盤 -->
+  <section class="block" id="sec-keyboard">
+    <h2>6. 鍵盤事件 <span class="level mid">中等</span></h2>
+    <div class="howto">
+      <b>操作說明</b>
+      <ol>
+        <li>在輸入框中按任意鍵，下方會顯示按下的按鍵名稱（例如 <code>Enter</code>、<code>Tab</code>、<code>ArrowUp</code>）。</li>
+        <li>按 <code>Ctrl + Enter</code>（Mac 為 <code>Cmd + Enter</code>）會顯示「已送出：輸入框內容」。</li>
+        <li>自動完成：在「搜尋城市」輸入「台」，會出現建議清單，可用方向鍵 ↓ 移動並按 Enter 選取。</li>
+      </ol>
+    </div>
+    <div class="practice">
+      <b>練習題</b>
+      <ol>
+        <li>在按鍵偵測輸入框按 <code>Enter</code>，驗證顯示「你按下了：Enter」。</li>
+        <li>輸入文字後按 <code>Ctrl + Enter</code>，驗證顯示「已送出：」加上輸入內容。</li>
+        <li>在「搜尋城市」輸入「台」，按兩次 ↓ 再按 Enter，驗證選到「台中」。</li>
+      </ol>
+    </div>
+    <div class="row">
+      <label for="key-input">按鍵偵測：</label><input type="text" id="key-input" placeholder="在這裡按鍵">
+    </div>
+    <div class="row" style="position:relative;">
+      <label for="autocomplete-input">搜尋城市：</label>
+      <div style="position:relative;">
+        <input type="text" id="autocomplete-input" autocomplete="off" placeholder="輸入「台」試試">
+        <ul id="autocomplete-list" class="hidden" style="position:absolute; left:0; right:0; margin:2px 0 0; padding:0; list-style:none; background:#fff; border:1px solid var(--border); border-radius:6px; z-index:5;"></ul>
+      </div>
+    </div>
+    <div class="result" id="key-result"></div>
+  </section>
+
+  <!-- 7. 檔案上傳 -->
+  <section class="block" id="sec-upload">
+    <h2>7. 檔案上傳與下載 <span class="level mid">中等</span></h2>
+    <div class="howto">
+      <b>操作說明</b>
+      <ol>
+        <li>對 <code>#file-upload</code> 直接 <code>send_keys('檔案絕對路徑')</code>（或 Playwright <code>set_input_files</code>），不要點擊開啟系統對話框。</li>
+        <li>「多檔上傳」可同時選擇多個檔案。</li>
+        <li>按「上傳」後會顯示檔名與大小（不會真的上傳到伺服器）。</li>
+        <li>「下載範例檔」會下載一個 <code>sample.txt</code>，可練習驗證下載。</li>
+      </ol>
+    </div>
+    <div class="practice">
+      <b>練習題</b>
+      <ol>
+        <li>用 <code>send_keys</code> 或 <code>set_input_files</code> 上傳一個檔案，按「上傳」驗證檔名出現在結果中。</li>
+        <li>在「多檔上傳」一次上傳兩個檔案，驗證結果列出兩個檔名。</li>
+        <li>不選檔案直接按「上傳」，驗證顯示「請先選擇檔案」。</li>
+        <li>點擊「下載範例檔」，驗證下載的檔名為 <code>sample.txt</code>。</li>
+      </ol>
+    </div>
+    <div class="row"><label for="file-upload">單檔：</label><input type="file" id="file-upload"></div>
+    <div class="row"><label for="file-upload-multi">多檔上傳：</label><input type="file" id="file-upload-multi" multiple></div>
+    <div class="row">
+      <button id="btn-upload">上傳</button>
+      <a id="link-download" class="btn" download="sample.txt" href="data:text/plain;charset=utf-8,%E9%80%99%E6%98%AF%E7%AF%84%E4%BE%8B%E4%B8%8B%E8%BC%89%E6%AA%94%E6%A1%88">下載範例檔</a>
+    </div>
+    <div class="result" id="upload-result"></div>
+  </section>
+
+  <!-- 8. 動態表格 -->
+  <section class="block" id="sec-table">
+    <h2>8. 動態表格 <span class="level mid">中等</span></h2>
+    <div class="howto">
+      <b>操作說明</b>
+      <ol>
+        <li>在上方輸入姓名、部門、薪資後按「新增」，資料會加到表格最後一列。</li>
+        <li>點擊欄位標題可排序（再點一次反向）。</li>
+        <li>在「搜尋」輸入文字會即時篩選表格。</li>
+        <li>每列最後都有「刪除」按鈕，可練習「找出某人那一列並刪除」。</li>
+        <li>表格下方會顯示目前列數與薪資總和。</li>
+      </ol>
+    </div>
+    <div class="practice">
+      <b>練習題</b>
+      <ol>
+        <li>讀取所有列，計算薪資總和並與表格下方的總和比對。</li>
+        <li>刪除「陳小明」那一列，驗證列數減少 1。</li>
+        <li>新增一筆資料，驗證最後一列的內容正確。</li>
+        <li>點擊「薪資」標題排序，驗證第一列為最低薪資；再點一次驗證為最高薪資。</li>
+        <li>搜尋「測試部」，驗證只剩下測試部的資料。</li>
+      </ol>
+    </div>
+    <div class="row">
+      <input type="text" id="tbl-name" placeholder="姓名">
+      <input type="text" id="tbl-dept" placeholder="部門">
+      <input type="number" id="tbl-salary" placeholder="薪資">
+      <button id="tbl-add">新增</button>
+      <input type="text" id="tbl-search" placeholder="搜尋…">
+    </div>
+    <table id="employee-table">
+      <thead><tr><th data-col="0">編號 ⇅</th><th data-col="1">姓名 ⇅</th><th data-col="2">部門 ⇅</th><th data-col="3">薪資 ⇅</th><th>操作</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div class="result" id="table-summary"></div>
+  </section>
+
+  <!-- 9. 瀏覽器對話框 -->
+  <section class="block" id="sec-dialog">
+    <h2>9. 瀏覽器對話框（alert / confirm / prompt） <span class="level mid">中等</span></h2>
+    <div class="howto">
+      <b>操作說明</b>
+      <ol>
+        <li>「Alert」跳出提示框，文字為「這是一個 Alert 提示框」。</li>
+        <li>「Confirm」按確定顯示「你按了確定」，按取消顯示「你按了取消」。</li>
+        <li>「Prompt」輸入文字後，結果會顯示「你輸入了：xxx」。</li>
+        <li>「延遲 Alert」會在 2 秒後才跳出。</li>
+      </ol>
+    </div>
+    <div class="practice">
+      <b>練習題</b>
+      <ol>
+        <li>點擊 Alert，讀取對話框文字並驗證為「這是一個 Alert 提示框」後關閉（Selenium <code>switch_to.alert</code> / Playwright <code>page.on('dialog')</code>）。</li>
+        <li>點擊 Confirm 並接受，驗證顯示「你按了確定」；再點一次並取消，驗證顯示「你按了取消」。</li>
+        <li>點擊 Prompt 輸入你的名字，驗證顯示「你輸入了：」加上名字。</li>
+        <li>點擊「延遲 Alert」，用等待處理 2 秒後才出現的對話框。</li>
+      </ol>
+    </div>
+    <div class="row">
+      <button id="btn-alert">Alert</button>
+      <button id="btn-confirm">Confirm</button>
+      <button id="btn-prompt">Prompt</button>
+      <button id="btn-delayed-alert" class="secondary">延遲 Alert</button>
+    </div>
+    <div class="result" id="dialog-result"></div>
+  </section>
+
+  <!-- 10. 自訂彈窗 -->
+  <section class="block" id="sec-modal">
+    <h2>10. 自訂彈窗（Modal）與提示訊息（Toast） <span class="level mid">中等</span></h2>
+    <div class="howto">
+      <b>操作說明</b>
+      <ol>
+        <li>按「開啟彈窗」會出現 HTML 自訂彈窗（不是瀏覽器原生對話框，要用一般元素定位）。</li>
+        <li>在彈窗中輸入名稱並按「儲存」，彈窗關閉並顯示結果；按「取消」或右上角 ✕ 直接關閉。</li>
+        <li>「顯示 Toast」會在右下角出現提示，3 秒後自動消失，可練習等待元素消失（invisibility）。</li>
+      </ol>
+    </div>
+    <div class="practice">
+      <b>練習題</b>
+      <ol>
+        <li>開啟彈窗、輸入專案名稱並儲存，驗證彈窗消失且結果顯示「已儲存專案：」加上名稱。</li>
+        <li>開啟彈窗後按 ✕ 關閉，驗證顯示「已關閉彈窗」。</li>
+        <li>名稱留空按「儲存」，驗證彈窗仍然存在。</li>
+        <li>點擊「顯示 Toast」，驗證 <code>#toast-message</code> 出現，再等待它消失。</li>
+      </ol>
+    </div>
+    <div class="row">
+      <button id="btn-open-modal">開啟彈窗</button>
+      <button id="btn-toast" class="secondary">顯示 Toast</button>
+    </div>
+    <div class="result" id="modal-result"></div>
+    <div class="modal-mask hidden" id="modal-mask" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h3 id="modal-title" style="margin:0;">新增專案</h3>
+          <button class="secondary modal-close" aria-label="關閉">✕</button>
+        </div>
+        <p>請輸入專案名稱：</p>
+        <input type="text" id="modal-input" style="width:100%;">
+        <div class="row" style="justify-content:flex-end; margin-top:14px;">
+          <button class="secondary" id="modal-cancel">取消</button>
+          <button id="modal-save">儲存</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11. 等待與動態載入 -->
+  <section class="block" id="sec-wait">
+    <h2>11. 等待與動態載入 <span class="level mid">中等</span></h2>
+    <div class="howto">
+      <b>操作說明</b>
+      <ol>
+        <li>「載入資料」會顯示讀取中圖示，隨機 1~4 秒後出現 <code>#loaded-data</code>。請勿使用固定 sleep，改用明確等待。</li>
+        <li>「顯示隱藏元素」：<code>#hidden-element</code> 一開始就在 DOM 中但不可見，按下 2 秒後才顯示（練習 presence vs visibility）。</li>
+        <li>「改變文字」：<code>#changing-text</code> 會在 3 秒後從「處理中…」變成「處理完成」（練習等待文字）。</li>
+        <li>「進度條」：按下後進度從 0% 跑到 100%，跑完會顯示「完成」。</li>
+      </ol>
+    </div>
+    <div class="practice">
+      <b>練習題</b>
+      <ol>
+        <li>點擊「載入資料」，用明確等待（不用固定 sleep）等到 <code>#loaded-data</code> 出現並驗證文字。</li>
+        <li>點擊「顯示隱藏元素」，驗證 <code>#hidden-element</code> 一開始存在於 DOM 但不可見，等待它變為可見。</li>
+        <li>點擊「改變文字」，等待 <code>#changing-text</code> 變成「處理完成」。</li>
+        <li>點擊「開始進度條」，等待 <code>#progress-text</code> 顯示「完成」。</li>
+      </ol>
+    </div>
+    <div class="row">
+      <button id="btn-load-data">載入資料</button>
+      <span id="loading-indicator" class="hidden"><span class="spinner"></span> 讀取中…</span>
+    </div>
+    <div id="load-target"></div>
+    <div class="row">
+      <button id="btn-show-hidden" class="secondary">顯示隱藏元素</button>
+      <div id="hidden-element" style="display:none;" class="ok">我原本是隱藏的！</div>
+    </div>
+    <div class="row">
+      <button id="btn-change-text" class="secondary">改變文字</button>
+      <span id="changing-text">尚未開始</span>
+    </div>
+    <div class="row">
+      <button id="btn-progress" class="secondary">開始進度條</button>
+      <progress id="progress-bar" value="0" max="100" style="width:200px;"></progress>
+      <span id="progress-text">0%</span>
+    </div>
+  </section>
+
+  <!-- 12. 滑鼠懸停 -->
+  <section class="block" id="sec-hover">
+    <h2>12. 滑鼠懸停（Hover） <span class="level mid">中等</span></h2>
+    <div class="howto">
+      <b>操作說明</b>
+      <ol>
+        <li>將滑鼠移到「產品選單」上，才會出現子選單，再點擊其中一個項目。</li>
+        <li>將滑鼠移到「<span style="border-bottom:1px dotted;">說明文字</span>」上會出現提示框（tooltip），請驗證提示內容為「這是提示說明」。</li>
+        <li>將滑鼠移入灰色方塊時文字變為「滑鼠在裡面」，移出變為「滑鼠在外面」。</li>
+      </ol>
+    </div>
+    <div class="practice">
+      <b>練習題</b>
+      <ol>
+        <li>懸停在「產品選單」上，點擊「筆電」，驗證結果顯示「你選擇了：筆電」。</li>
+        <li>懸停在「說明文字」上，驗證提示框可見且內容為「這是提示說明」。</li>
+        <li>將滑鼠移入灰色方塊驗證顯示「滑鼠在裡面」，移出後驗證顯示「滑鼠在外面」。</li>
+      </ol>
+    </div>
+    <div class="row">
+      <div class="menu" id="hover-menu">
+        <button>產品選單 ▾</button>
+        <div class="menu-list">
+          <a href="#" data-item="phone">手機</a>
+          <a href="#" data-item="laptop">筆電</a>
+          <a href="#" data-item="tablet">平板</a>
+        </div>
+      </div>
+      <span class="tooltip-target" id="tooltip-target">說明文字<span class="tip" role="tooltip">這是提示說明</span></span>
+      <div id="hover-box" style="width:160px; padding:14px; background:#e2e8f0; border-radius:6px; text-align:center;">滑鼠在外面</div>
+    </div>
+    <div class="result" id="hover-result"></div>
+  </section>
+
+  <!-- 13. 捲動 -->
+  <section class="block" id="sec-scroll">
+    <h2>13. 捲動與無限載入 <span class="level mid">中等</span></h2>
+    <div class="howto">
+      <b>操作說明</b>
+      <ol>
+        <li>下方框內有 10 筆資料，捲到最底會自動再載入 10 筆，最多 50 筆，之後顯示「沒有更多資料了」。</li>
+        <li>可用 <code>scrollIntoView</code> 或 Playwright 的自動捲動讓元素進入畫面。</li>
+        <li>頁面最下方有一個「回到頂端」按鈕，需捲到頁尾才看得到。</li>
+      </ol>
+    </div>
+    <div class="practice">
+      <b>練習題</b>
+      <ol>
+        <li>持續捲動清單直到出現「第 37 筆資料」，點擊它並驗證結果。</li>
+        <li>一直捲到清單底部，驗證最後出現「沒有更多資料了」，且共 50 筆資料。</li>
+        <li>捲到頁面最下方點擊「回到頂端」，驗證頁面回到最上方。</li>
+      </ol>
+    </div>
+    <div class="scroll-box" id="infinite-list"></div>
+    <div class="result" id="scroll-result"></div>
+  </section>
+
+  <!-- 14. 新分頁與新視窗 -->
+  <section class="block" id="sec-newtab">
+    <h2>14. 新分頁與新視窗 <span class="level mid">中等</span></h2>
+    <div class="howto">
+      <b>操作說明</b>
+      <ol>
+        <li>「連結開新分頁」是 <code>target="_blank"</code> 的超連結，點擊後會開啟新分頁，新頁標題為「新分頁 - 練習頁面」。</li>
+        <li>「按鈕開新分頁」使用 JavaScript <code>window.open()</code> 開啟。</li>
+        <li>「開新視窗」會開啟一個指定大小的彈出視窗。</li>
+        <li>新頁面中有一個輸入框與按鈕，輸入文字並按「回傳給主頁」，主頁下方會收到該文字（新頁面會自動關閉）。</li>
+        <li>「延遲 2 秒開分頁」可練習等待分頁數量變化。</li>
+      </ol>
+    </div>
+    <div class="practice">
+      <b>練習題</b>
+      <ol>
+        <li>點擊「連結開新分頁」，切換到新分頁並驗證標題為「新分頁 - 練習頁面」（Selenium <code>switch_to.window</code> / Playwright <code>context.expect_page()</code>）。</li>
+        <li>在新分頁輸入文字並按「回傳給主頁」，切回主頁驗證 <code>#newtab-result</code> 顯示該文字。</li>
+        <li>點擊「開新視窗」，驗證視窗數量變為 2，關閉後切回主頁。</li>
+        <li>點擊「延遲 2 秒開分頁」，等待新分頁載入完成再驗證標題。</li>
+        <li>點擊「在同一分頁開啟子頁面」，驗證網址含 <code>page=sametab</code>，再用上一頁回到主頁。</li>
+      </ol>
+    </div>
+    <div class="row">
+      <a id="link-new-tab" class="btn" href="?page=newtab" target="_blank">連結開新分頁</a>
+      <button id="btn-new-tab">按鈕開新分頁</button>
+      <button id="btn-new-window">開新視窗</button>
+      <button id="btn-delayed-tab" class="secondary">延遲 2 秒開分頁</button>
+      <a id="link-same-tab" href="?page=sametab">在同一分頁開啟子頁面</a>
+    </div>
+    <div class="result" id="newtab-result">尚未收到新分頁的訊息</div>
+  </section>
+
+  <!-- 15. 難定位元件 -->
+  <section class="block" id="sec-hard">
+    <h2>15. 難定位元件 <span class="level hard">困難</span></h2>
+    <div class="howto">
+      <b>操作說明</b>
+      這一區的元件<b>刻意沒有 id</b>，請練習 XPath、CSS Selector、文字定位、相對定位等技巧。
+      <ol>
+        <li><b>A. 重複 class：</b>三個按鈕 class 完全相同，請只點「確認」那顆（提示：依文字 <code>//button[text()='確認']</code>）。</li>
+        <li><b>B. 動態 id：</b>按鈕的 id 每次重新整理都會變（例如 <code>btn-8271</code>），請改用其他屬性定位（提示：<code>[id^='btn-']</code> 或 <code>data-action</code>）。</li>
+        <li><b>C. 商品卡片：</b>找到「無線滑鼠」那張卡片，點擊同一張卡片裡的「加入購物車」（提示：先找名稱再往上找卡片，<code>ancestor::</code> 或 Playwright 的 <code>filter(has_text=...)</code>）。</li>
+        <li><b>D. 深層巢狀：</b>多層 div 裡藏著一個連結，只有 class 名稱是隨機的。</li>
+        <li><b>E. 相鄰元素：</b>只知道標籤文字「員工編號」，請找到它右邊的輸入框並輸入資料（提示：<code>following-sibling::</code>）。</li>
+        <li><b>F. 第 N 個項目：</b>點擊清單中的第 3 個項目（提示：<code>li:nth-child(3)</code>）。</li>
+        <li><b>G. 只有 aria-label 的圖示按鈕：</b>沒有文字，只能用 <code>aria-label</code> 或 role 定位。</li>
+      </ol>
+    </div>
+    <div class="practice">
+      <b>練習題</b>
+      <ol>
+        <li>A：只點擊文字為「確認」的按鈕，驗證結果。</li>
+        <li>B：不使用 id，定位「儲存」動態 id 按鈕並點擊；重新整理後確認你的定位方式仍然有效。</li>
+        <li>C：點擊「無線滑鼠」卡片內的「加入購物車」，驗證按鈕變為「已加入 ✓」。</li>
+        <li>D：定位深層連結並點擊，驗證結果。</li>
+        <li>E：在「員工編號」右邊的輸入框輸入 <code>E001</code>，按「讀取 E 區輸入值」驗證。</li>
+        <li>F：點擊清單第 3 個項目，驗證結果為「項目三」。</li>
+        <li>G：用 <code>aria-label</code> 點擊「編輯」圖示按鈕，驗證結果。</li>
+      </ol>
+    </div>
+
+    <p><b>A. 重複 class 的按鈕</b></p>
+    <div class="row">
+      <button class="action-btn">取消</button>
+      <button class="action-btn">確認</button>
+      <button class="action-btn">稍後再說</button>
+    </div>
+
+    <p><b>B. 動態 id 按鈕</b></p>
+    <div class="row" id="dynamic-id-container"></div>
+
+    <p><b>C. 商品卡片</b></p>
+    <div class="card-list">
+      <div class="product"><div class="name">機械鍵盤</div><div class="price">NT$ 2,490</div><button class="secondary add-cart">加入購物車</button></div>
+      <div class="product"><div class="name">無線滑鼠</div><div class="price">NT$ 890</div><button class="secondary add-cart">加入購物車</button></div>
+      <div class="product"><div class="name">27 吋螢幕</div><div class="price">NT$ 6,990</div><button class="secondary add-cart">加入購物車</button></div>
+      <div class="product"><div class="name">USB-C 集線器</div><div class="price">NT$ 1,290</div><button class="secondary add-cart">加入購物車</button></div>
+    </div>
+
+    <p><b>D. 深層巢狀連結</b></p>
+    <div><div><div><div><div>
+      <span><a href="#" class="lnk-x93kd" onclick="hardResult('D. 你找到了深層連結！'); return false;">隱藏在深處的連結</a></span>
+    </div></div></div></div></div>
+
+    <p><b>E. 相鄰元素</b></p>
+    <div class="row"><span>員工編號</span><input type="text" placeholder=""><span>部門</span><input type="text" placeholder=""></div>
+    <div class="row"><button class="secondary" onclick="readSiblingInputs()">讀取 E 區輸入值</button></div>
+
+    <p><b>F. 第 N 個項目</b></p>
+    <ul class="sortable" style="max-width:300px;">
+      <li onclick="hardResult('F. 你點擊了：' + this.textContent)">項目一</li>
+      <li onclick="hardResult('F. 你點擊了：' + this.textContent)">項目二</li>
+      <li onclick="hardResult('F. 你點擊了：' + this.textContent)">項目三</li>
+      <li onclick="hardResult('F. 你點擊了：' + this.textContent)">項目四</li>
+    </ul>
+
+    <p><b>G. 圖示按鈕</b></p>
+    <div class="row">
+      <button aria-label="刪除" title="" onclick="hardResult('G. 已點擊「刪除」圖示')">🗑</button>
+      <button aria-label="編輯" onclick="hardResult('G. 已點擊「編輯」圖示')">✏️</button>
+      <button aria-label="分享" onclick="hardResult('G. 已點擊「分享」圖示')">🔗</button>
+    </div>
+
+    <div class="result" id="hard-result"></div>
+  </section>
+
+  <!-- 16. 拖曳 -->
+  <section class="block" id="sec-drag">
+    <h2>16. 拖曳（Drag & Drop） <span class="level hard">困難</span></h2>
+    <div class="howto">
+      <b>操作說明</b>
+      <ol>
+        <li>將黃色項目拖到右側「目標區」，目標區會列出已放入的項目。</li>
+        <li>下方清單可拖曳排序，排序後結果會顯示目前順序。</li>
+        <li>使用 HTML5 原生拖曳 API，Selenium 的 <code>drag_and_drop</code> 在某些版本可能無效，可改用 Playwright <code>drag_to()</code> 或 JavaScript 模擬。</li>
+      </ol>
+    </div>
+    <div class="practice">
+      <b>練習題</b>
+      <ol>
+        <li>把「香蕉」拖到目標區，驗證結果顯示「目標區內：香蕉」。</li>
+        <li>依序把三個水果都拖到目標區，驗證順序與拖曳順序一致。</li>
+        <li>把「第四步：回報缺陷」拖到清單最上面，驗證結果的順序。</li>
+      </ol>
+    </div>
+    <div class="grid2">
+      <div class="box" id="drag-source">
+        <div class="drag-item" draggable="true" id="drag-a" data-name="蘋果">🍎 蘋果</div>
+        <div class="drag-item" draggable="true" id="drag-b" data-name="香蕉">🍌 香蕉</div>
+        <div class="drag-item" draggable="true" id="drag-c" data-name="葡萄">🍇 葡萄</div>
+      </div>
+      <div class="dropzone" id="drop-zone"><b>目標區</b><div id="drop-list"></div></div>
+    </div>
+    <p><b>拖曳排序：</b></p>
+    <ul class="sortable" id="sortable-list" style="max-width:300px;">
+      <li draggable="true">第一步：需求分析</li>
+      <li draggable="true">第二步：撰寫測試案例</li>
+      <li draggable="true">第三步：執行測試</li>
+      <li draggable="true">第四步：回報缺陷</li>
+    </ul>
+    <div class="result" id="drag-result"></div>
+  </section>
+
+  <!-- 17. iframe -->
+  <section class="block" id="sec-iframe">
+    <h2>17. iframe 內嵌框架 <span class="level hard">困難</span></h2>
+    <div class="howto">
+      <b>操作說明</b>
+      下方框架是一個獨立的文件，直接在主頁找 iframe 裡的元素會找不到，必須先切換進 iframe。
+      <ol>
+        <li>切換到 <code>#practice-iframe</code>（或 <code>name="practiceFrame"</code>）。</li>
+        <li>在框架內的 <code>#iframe-input</code> 輸入文字，按「送出」，框架內會顯示結果。</li>
+        <li>框架內還有一個巢狀 iframe（<code>#inner-iframe</code>），裡面有一顆按鈕，需要再切換一層。</li>
+        <li>操作完記得切回主頁（<code>switch_to.default_content()</code>）。</li>
+      </ol>
+    </div>
+    <div class="practice">
+      <b>練習題</b>
+      <ol>
+        <li>切換到 <code>#practice-iframe</code>，在 <code>#iframe-input</code> 輸入文字並送出，驗證 <code>#iframe-result</code>。</li>
+        <li>再切換進 <code>#inner-iframe</code>，點擊「內層按鈕」並驗證結果。</li>
+        <li>切回主頁，驗證可以再次操作主頁上的元素（例如讀取 <code>#page-title</code>）。</li>
+      </ol>
+    </div>
+    <iframe id="practice-iframe" name="practiceFrame" title="練習框架" style="width:100%; height:240px; border:1px solid var(--border); border-radius:6px;"></iframe>
+  </section>
+
+  <!-- 18. Shadow DOM -->
+  <section class="block" id="sec-shadow">
+    <h2>18. Shadow DOM <span class="level hard">困難</span></h2>
+    <div class="howto">
+      <b>操作說明</b>
+      下方元件在 Shadow DOM 中，一般 XPath 無法穿透。
+      <ol>
+        <li>宿主元素為 <code>#shadow-host</code>（open 模式）。</li>
+        <li>Selenium 4 可用 <code>host.shadow_root.find_element(By.CSS_SELECTOR, '#shadow-input')</code>；Playwright 的 CSS 定位器預設可穿透。</li>
+        <li>在 Shadow DOM 輸入框輸入文字並按按鈕，下方會顯示結果。</li>
+      </ol>
+    </div>
+    <div class="practice">
+      <b>練習題</b>
+      <ol>
+        <li>定位 <code>#shadow-host</code> 的 shadow root，在 <code>#shadow-input</code> 輸入文字。</li>
+        <li>點擊 Shadow DOM 中的「確認」按鈕，驗證 <code>#shadow-result</code> 顯示「Shadow DOM 收到：」加上輸入內容。</li>
+        <li>嘗試直接用一般 XPath 找 <code>#shadow-input</code>，觀察為什麼找不到。</li>
+      </ol>
+    </div>
+    <div id="shadow-host"></div>
+  </section>
+
+  <div class="row" style="justify-content:center;"><button id="btn-back-top" class="secondary">回到頂端</button></div>
+  </main>
+</div>
+<footer>網頁自動化測試練習場 · 本網頁由 AI 助理 Claude（Anthropic 開發）製作</footer>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  const setResult = (id, text, cls) => { const el = document.getElementById(id); el.textContent = text; el.className = 'result' + (cls ? ' ' + cls : ''); };
+
+  /* ========== 子頁面模式（新分頁 / 新視窗 / 同頁） ========== */
+  const params = new URLSearchParams(location.search);
+  const page = params.get('page');
+  if (page) {
+    const titles = { newtab: '新分頁 - 練習頁面', jstab: 'JS 新分頁 - 練習頁面', popup: '新視窗 - 練習頁面', delayed: '延遲分頁 - 練習頁面', sametab: '子頁面 - 練習頁面' };
+    document.title = titles[page] || '子頁面 - 練習頁面';
+    $('#main-root').classList.add('hidden');
+    const root = $('#subpage-root');
+    root.classList.remove('hidden');
+    root.innerHTML = `
+      <header><h1 id="subpage-title">${document.title}</h1><p>這是從主練習頁開啟的頁面（page=${page}）。</p></header>
+      <div style="max-width:600px; margin:20px auto; padding:0 16px;">
+        <section class="block">
+          <h2>子頁面操作</h2>
+          <div class="howto"><b>操作說明</b>
+            ${page === 'sametab'
+              ? '這個頁面是在同一分頁開啟的。按「返回主頁」或使用瀏覽器的上一頁（<code>driver.back()</code>）。'
+              : '輸入任意文字並按「回傳給主頁」，主頁的 <code>#newtab-result</code> 會顯示這段文字，此分頁會自動關閉。也可以按「關閉此分頁」直接關閉。'}
+          </div>
+          <div class="row"><label for="child-input">訊息：</label><input type="text" id="child-input" placeholder="要傳回主頁的文字"></div>
+          <div class="row">
+            ${page === 'sametab' ? '<a id="back-home" class="btn" href="?">返回主頁</a>' : '<button id="send-back">回傳給主頁</button><button id="close-tab" class="secondary">關閉此分頁</button>'}
+          </div>
+          <div class="result" id="child-result">頁面識別碼：<span id="page-type">${page}</span></div>
+        </section>
+      </div>`;
+    const send = $('#send-back');
+    if (send) {
+      send.addEventListener('click', () => {
+        const msg = $('#child-input').value;
+        if (window.opener && !window.opener.closed) {
+          window.opener.postMessage({ type: 'from-child', page, msg }, '*');
+          setResult('child-result', '已回傳：' + msg, 'ok');
+          setTimeout(() => window.close(), 500);
+        } else {
+          // target=_blank 預設 noopener，改用 localStorage 回傳
+          try { localStorage.setItem('practice-child-msg', JSON.stringify({ page, msg, t: Date.now() })); } catch (e) {}
+          setResult('child-result', '已回傳：' + msg, 'ok');
+          setTimeout(() => window.close(), 500);
+        }
+      });
+      $('#close-tab').addEventListener('click', () => window.close());
+    }
+    return;
+  }
+
+  /* ========== 1. 登入 ========== */
+  $('#login-btn').addEventListener('click', () => {
+    const u = $('#username').value.trim(), p = $('#password').value;
+    if (!u || !p) return setResult('login-result', '請輸入帳號與密碼', 'err');
+    if (u === 'admin' && p === '123456') {
+      setResult('login-result', '登入成功，歡迎 ' + u + (($('#remember-me').checked) ? '\n已記住帳號' : ''), 'ok');
+    } else {
+      setResult('login-result', '帳號或密碼錯誤', 'err');
+    }
+  });
+  $('#reset-btn').addEventListener('click', () => setResult('login-result', ''));
+
+  /* ========== 2. 輸入框 ========== */
+  $('#input-counter').addEventListener('input', e => { $('#counter-display').textContent = e.target.value.length + ' / 20'; });
+  $('#submit-inputs').addEventListener('click', () => {
+    const email = $('#input-email').value, age = $('#input-age').value;
+    const errors = [];
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('Email 格式錯誤');
+    if (age && (Number(age) < 1 || Number(age) > 120)) errors.push('年齡必須介於 1 到 120');
+    if (errors.length) return setResult('inputs-result', errors.join('\n'), 'err');
+    const data = { 姓名: $('#input-name').value, Email: email, 年齡: age, 生日: $('#input-date').value,
+                   唯讀欄位: $('#input-readonly').value, 即時字數: $('#input-counter').value, 備註: $('#input-comment').value };
+    setResult('inputs-result', JSON.stringify(data, null, 2), 'ok');
+  });
+
+  /* ========== 3. 選擇 ========== */
+  const subCities = { tw: ['台北', '台中', '高雄'], jp: ['東京', '大阪', '京都'], us: ['紐約', '洛杉磯', '舊金山'] };
+  $('#select-country').addEventListener('change', e => {
+    const sub = $('#select-sub-city');
+    sub.disabled = true;
+    sub.innerHTML = '<option value="">載入中…</option>';
+    const list = subCities[e.target.value];
+    if (!list) { sub.innerHTML = '<option value="">-- 先選國家 --</option>'; return; }
+    setTimeout(() => {
+      sub.innerHTML = '<option value="">-- 請選擇 --</option>' + list.map(c => `<option value="${c}">${c}</option>`).join('');
+      sub.disabled = false;
+    }, 800);
+  });
+  let customValue = '';
+  const cTrigger = $('#custom-select-trigger'), cOptions = $('#custom-select .custom-options');
+  cTrigger.addEventListener('click', () => cOptions.classList.toggle('hidden'));
+  $$('.custom-option').forEach(o => o.addEventListener('click', () => {
+    customValue = o.textContent; cTrigger.textContent = o.textContent + ' ▾'; cOptions.classList.add('hidden');
+  }));
+  $('#confirm-choice').addEventListener('click', () => {
+    const city = $('#select-city');
+    const langs = Array.from($('#select-lang').selectedOptions).map(o => o.text);
+    const gender = $('input[name=gender]:checked');
+    const hobbies = $$('input[name=hobby]:checked').map(c => c.value);
+    setResult('choice-result', [
+      '城市：' + (city.value ? city.selectedOptions[0].text : '未選擇'),
+      '程式語言：' + (langs.join('、') || '未選擇'),
+      '國家/城市：' + ($('#select-country').value ? $('#select-country').selectedOptions[0].text : '未選擇') + ' / ' + ($('#select-sub-city').value || '未選擇'),
+      '性別：' + (gender ? gender.nextElementSibling.textContent : '未選擇'),
+      '興趣：' + (hobbies.join('、') || '未選擇'),
+      '水果：' + (customValue || '未選擇')
+    ].join('\n'), 'ok');
+  });
+
+  /* ========== 4. 按鈕 ========== */
+  $('#btn-single').addEventListener('click', () => setResult('buttons-result', '你單擊了按鈕', 'ok'));
+  $('#btn-double').addEventListener('dblclick', () => setResult('buttons-result', '你雙擊了按鈕', 'ok'));
+  $('#btn-right').addEventListener('contextmenu', e => { e.preventDefault(); setResult('buttons-result', '你按了右鍵', 'ok'); });
+  let count = 0;
+  $('#btn-counter').addEventListener('click', () => { $('#counter-value').textContent = ++count; });
+  $('#btn-counter-reset').addEventListener('click', () => { count = 0; $('#counter-value').textContent = 0; });
+  $('#btn-start-countdown').addEventListener('click', () => {
+    const btn = $('#btn-delayed'); btn.disabled = true;
+    let s = 3; $('#countdown-text').textContent = '剩餘 ' + s + ' 秒';
+    const t = setInterval(() => {
+      s--;
+      if (s <= 0) { clearInterval(t); btn.disabled = false; $('#countdown-text').textContent = '按鈕已啟用'; }
+      else $('#countdown-text').textContent = '剩餘 ' + s + ' 秒';
+    }, 1000);
+  });
+  $('#btn-delayed').addEventListener('click', () => setResult('buttons-result', '你點擊了延遲啟用的按鈕', 'ok'));
+  $('#btn-covered').addEventListener('click', () => setResult('buttons-result', '你點擊了被遮住的按鈕', 'ok'));
+  $('#btn-remove-overlay').addEventListener('click', () => { const o = $('#overlay-cover'); if (o) o.remove(); setResult('buttons-result', '遮罩已移除'); });
+
+  /* ========== 5. 難定位 ========== */
+  window.hardResult = (t) => setResult('hard-result', t, 'ok');
+  $$('.action-btn').forEach(b => b.addEventListener('click', () => hardResult('A. 你點擊了：' + b.textContent)));
+  const dynWrap = $('#dynamic-id-container');
+  ['送出', '儲存'].forEach((label, i) => {
+    const b = document.createElement('button');
+    b.id = 'btn-' + Math.floor(1000 + Math.random() * 9000);
+    b.className = 'secondary dyn-' + Math.random().toString(36).slice(2, 7);
+    b.dataset.action = i === 0 ? 'submit' : 'save';
+    b.textContent = label;
+    b.addEventListener('click', () => hardResult('B. 你點擊了動態 id 按鈕「' + label + '」（本次 id = ' + b.id + '）'));
+    dynWrap.appendChild(b);
+  });
+  $$('.add-cart').forEach(b => b.addEventListener('click', () => {
+    const name = b.closest('.product').querySelector('.name').textContent;
+    b.textContent = '已加入 ✓'; b.disabled = true;
+    hardResult('C. 已將「' + name + '」加入購物車');
+  }));
+  window.readSiblingInputs = () => {
+    const inputs = $$('#sec-hard .row input[type=text]');
+    hardResult('E. 員工編號 = ' + (inputs[0].value || '(空)') + '，部門 = ' + (inputs[1].value || '(空)'));
+  };
+
+  /* ========== 6. 表格 ========== */
+  let employees = [
+    { id: 1, name: '陳小明', dept: '研發部', salary: 52000 },
+    { id: 2, name: '林美華', dept: '測試部', salary: 48000 },
+    { id: 3, name: '王大同', dept: '業務部', salary: 45000 },
+    { id: 4, name: '張雅婷', dept: '測試部', salary: 55000 },
+    { id: 5, name: '李志強', dept: '研發部', salary: 61000 }
+  ];
+  let nextId = 6, sortCol = null, sortAsc = true;
+  const keys = ['id', 'name', 'dept', 'salary'];
+  function renderTable() {
+    const q = $('#tbl-search').value.trim();
+    let rows = employees.filter(e => !q || [e.name, e.dept, String(e.salary)].some(v => v.includes(q)));
+    if (sortCol !== null) {
+      const k = keys[sortCol];
+      rows = rows.slice().sort((a, b) => (a[k] > b[k] ? 1 : a[k] < b[k] ? -1 : 0) * (sortAsc ? 1 : -1));
+    }
+    $('#employee-table tbody').innerHTML = rows.map(e =>
+      `<tr data-id="${e.id}"><td>${e.id}</td><td>${e.name}</td><td>${e.dept}</td><td>${e.salary}</td><td><button class="secondary del-row">刪除</button></td></tr>`).join('');
+    const total = rows.reduce((s, e) => s + e.salary, 0);
+    setResult('table-summary', `目前列數：${rows.length}，薪資總和：${total}`);
+  }
+  $('#employee-table tbody').addEventListener('click', e => {
+    if (!e.target.classList.contains('del-row')) return;
+    const id = Number(e.target.closest('tr').dataset.id);
+    employees = employees.filter(x => x.id !== id); renderTable();
+  });
+  $$('#employee-table th[data-col]').forEach(th => th.addEventListener('click', () => {
+    const c = Number(th.dataset.col); sortAsc = sortCol === c ? !sortAsc : true; sortCol = c; renderTable();
+  }));
+  $('#tbl-add').addEventListener('click', () => {
+    const name = $('#tbl-name').value.trim(), dept = $('#tbl-dept').value.trim(), salary = Number($('#tbl-salary').value);
+    if (!name || !dept || !salary) return setResult('table-summary', '請完整填寫姓名、部門與薪資', 'err');
+    employees.push({ id: nextId++, name, dept, salary });
+    $('#tbl-name').value = $('#tbl-dept').value = $('#tbl-salary').value = '';
+    renderTable();
+  });
+  $('#tbl-search').addEventListener('input', renderTable);
+  renderTable();
+
+  /* ========== 7. 新分頁 ========== */
+  const base = location.href.split('?')[0].split('#')[0];
+  $('#btn-new-tab').addEventListener('click', () => window.open(base + '?page=jstab', '_blank'));
+  $('#btn-new-window').addEventListener('click', () => window.open(base + '?page=popup', 'practicePopup', 'width=600,height=500'));
+  $('#btn-delayed-tab').addEventListener('click', () => {
+    setResult('newtab-result', '2 秒後開啟新分頁…');
+    // 先開空白頁再導向，避免被彈出視窗攔截
+    const w = window.open('about:blank', '_blank');
+    setTimeout(() => { if (w) w.location.href = base + '?page=delayed'; }, 2000);
+  });
+  const showChildMsg = (d) => setResult('newtab-result', `收到來自「${d.page}」頁面的訊息：${d.msg}`, 'ok');
+  window.addEventListener('message', e => { if (e.data && e.data.type === 'from-child') showChildMsg(e.data); });
+  window.addEventListener('storage', e => {
+    if (e.key === 'practice-child-msg' && e.newValue) { try { showChildMsg(JSON.parse(e.newValue)); } catch (err) {} }
+  });
+
+  /* ========== 8. 對話框 ========== */
+  $('#btn-alert').addEventListener('click', () => { alert('這是一個 Alert 提示框'); setResult('dialog-result', 'Alert 已關閉', 'ok'); });
+  $('#btn-confirm').addEventListener('click', () => setResult('dialog-result', confirm('你確定要繼續嗎？') ? '你按了確定' : '你按了取消', 'ok'));
+  $('#btn-prompt').addEventListener('click', () => {
+    const v = prompt('請輸入你的名字：', '');
+    setResult('dialog-result', v === null ? '你取消了輸入' : '你輸入了：' + v, 'ok');
+  });
+  $('#btn-delayed-alert').addEventListener('click', () => {
+    setResult('dialog-result', '2 秒後跳出 Alert…');
+    setTimeout(() => { alert('延遲 Alert 出現了'); setResult('dialog-result', '延遲 Alert 已關閉', 'ok'); }, 2000);
+  });
+
+  /* ========== 9. Modal / Toast ========== */
+  const mask = $('#modal-mask');
+  const closeModal = () => mask.classList.add('hidden');
+  $('#btn-open-modal').addEventListener('click', () => { $('#modal-input').value = ''; mask.classList.remove('hidden'); $('#modal-input').focus(); });
+  $('#modal-cancel').addEventListener('click', () => { closeModal(); setResult('modal-result', '已取消'); });
+  $('.modal-close').addEventListener('click', () => { closeModal(); setResult('modal-result', '已關閉彈窗'); });
+  $('#modal-save').addEventListener('click', () => {
+    const v = $('#modal-input').value.trim();
+    if (!v) { $('#modal-input').style.borderColor = 'var(--err)'; return; }
+    closeModal(); setResult('modal-result', '已儲存專案：' + v, 'ok');
+  });
+  $('#btn-toast').addEventListener('click', () => {
+    const t = document.createElement('div');
+    t.className = 'toast'; t.id = 'toast-message'; t.setAttribute('role', 'status'); t.textContent = '操作成功！';
+    const old = $('#toast-message'); if (old) old.remove();
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+  });
+
+  /* ========== 10. 等待 ========== */
+  $('#btn-load-data').addEventListener('click', () => {
+    $('#load-target').innerHTML = '';
+    $('#loading-indicator').classList.remove('hidden');
+    const ms = 1000 + Math.floor(Math.random() * 3000);
+    setTimeout(() => {
+      $('#loading-indicator').classList.add('hidden');
+      $('#load-target').innerHTML = `<div id="loaded-data" class="ok">資料載入完成（耗時 ${(ms / 1000).toFixed(1)} 秒）</div>`;
+    }, ms);
+  });
+  $('#btn-show-hidden').addEventListener('click', () => setTimeout(() => { $('#hidden-element').style.display = 'block'; }, 2000));
+  $('#btn-change-text').addEventListener('click', () => {
+    $('#changing-text').textContent = '處理中…';
+    setTimeout(() => { $('#changing-text').textContent = '處理完成'; }, 3000);
+  });
+  $('#btn-progress').addEventListener('click', () => {
+    let v = 0; const bar = $('#progress-bar'), txt = $('#progress-text');
+    const t = setInterval(() => {
+      v += 10; bar.value = v; txt.textContent = v + '%';
+      if (v >= 100) { clearInterval(t); txt.textContent = '完成'; }
+    }, 300);
+  });
+
+  /* ========== 11. iframe ========== */
+  const innerDoc = `<!DOCTYPE html><html><body style="font-family:sans-serif;margin:8px;background:#fef3c7;">
+    <p>這是<b>內層 iframe</b></p><button id="inner-btn" onclick="document.getElementById('inner-result').textContent='內層按鈕被點擊了'">內層按鈕</button>
+    <span id="inner-result"></span></body></html>`;
+  const outerDoc = `<!DOCTYPE html><html><body style="font-family:sans-serif;margin:12px;background:#f0f9ff;">
+    <h3 id="iframe-title" style="margin-top:0;">iframe 內的表單</h3>
+    <input type="text" id="iframe-input" placeholder="在 iframe 中輸入">
+    <button id="iframe-btn" onclick="document.getElementById('iframe-result').textContent='iframe 收到：'+document.getElementById('iframe-input').value">送出</button>
+    <p id="iframe-result"></p>
+    <iframe id="inner-iframe" name="innerFrame" style="width:95%;height:80px;border:1px solid #93c5fd;" srcdoc="${innerDoc.replace(/&/g, '&amp;').replace(/"/g, '&quot;')}"></iframe>
+    </body></html>`;
+  $('#practice-iframe').srcdoc = outerDoc;
+
+  /* ========== 12. Shadow DOM ========== */
+  const shadow = $('#shadow-host').attachShadow({ mode: 'open' });
+  shadow.innerHTML = `
+    <style>
+      .wrap { border: 2px solid #a78bfa; border-radius: 8px; padding: 12px; background: #f5f3ff; font-family: inherit; }
+      input { padding: 6px 10px; border: 1px solid #c4b5fd; border-radius: 6px; }
+      button { padding: 6px 12px; background: #7c3aed; color: #fff; border: 0; border-radius: 6px; cursor: pointer; }
+    </style>
+    <div class="wrap">
+      <p>這段內容在 Shadow DOM 裡面</p>
+      <input id="shadow-input" type="text" placeholder="Shadow 輸入框">
+      <button id="shadow-btn">確認</button>
+      <p id="shadow-result"></p>
+    </div>`;
+  shadow.getElementById('shadow-btn').addEventListener('click', () => {
+    shadow.getElementById('shadow-result').textContent = 'Shadow DOM 收到：' + shadow.getElementById('shadow-input').value;
+  });
+
+  /* ========== 13. Hover ========== */
+  $$('#hover-menu .menu-list a').forEach(a => a.addEventListener('click', e => {
+    e.preventDefault(); setResult('hover-result', '你選擇了：' + a.textContent, 'ok');
+  }));
+  const hb = $('#hover-box');
+  hb.addEventListener('mouseenter', () => { hb.textContent = '滑鼠在裡面'; hb.style.background = '#bfdbfe'; });
+  hb.addEventListener('mouseleave', () => { hb.textContent = '滑鼠在外面'; hb.style.background = '#e2e8f0'; });
+
+  /* ========== 14. 拖曳 ========== */
+  $$('.drag-item').forEach(it => it.addEventListener('dragstart', e => e.dataTransfer.setData('text/plain', it.id)));
+  const dz = $('#drop-zone');
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault(); dz.classList.remove('over');
+    const el = document.getElementById(e.dataTransfer.getData('text/plain'));
+    if (!el || !el.classList.contains('drag-item')) return;
+    $('#drop-list').appendChild(el);
+    const names = $$('#drop-list .drag-item').map(x => x.dataset.name);
+    setResult('drag-result', '目標區內：' + names.join('、'), 'ok');
+  });
+  let dragLi = null;
+  const sl = $('#sortable-list');
+  sl.addEventListener('dragstart', e => { dragLi = e.target.closest('li'); e.dataTransfer.setData('text/plain', 'sort'); });
+  sl.addEventListener('dragover', e => {
+    e.preventDefault();
+    const over = e.target.closest('li');
+    if (!dragLi || !over || over === dragLi) return;
+    const r = over.getBoundingClientRect();
+    sl.insertBefore(dragLi, (e.clientY - r.top) > r.height / 2 ? over.nextSibling : over);
+  });
+  sl.addEventListener('drop', e => {
+    e.preventDefault(); dragLi = null;
+    setResult('drag-result', '目前順序：' + $$('#sortable-list li').map(li => li.textContent.split('：')[1]).join(' → '), 'ok');
+  });
+
+  /* ========== 15. 上傳 ========== */
+  $('#btn-upload').addEventListener('click', () => {
+    const files = [...$('#file-upload').files, ...$('#file-upload-multi').files];
+    if (!files.length) return setResult('upload-result', '請先選擇檔案', 'err');
+    setResult('upload-result', '上傳成功：\n' + files.map(f => `${f.name}（${f.size} bytes）`).join('\n'), 'ok');
+  });
+
+  /* ========== 16. 頁籤 ========== */
+  $$('.tab-btn').forEach(b => b.addEventListener('click', () => {
+    $$('.tab-btn').forEach(x => { x.classList.remove('active'); x.setAttribute('aria-selected', 'false'); });
+    $$('.tab-panel').forEach(p => p.classList.add('hidden'));
+    b.classList.add('active'); b.setAttribute('aria-selected', 'true');
+    document.getElementById(b.dataset.tab).classList.remove('hidden');
+  }));
+
+  /* ========== 17. 無限捲動 ========== */
+  const list = $('#infinite-list');
+  let loaded = 0, loadingMore = false;
+  function loadMore() {
+    if (loaded >= 50 || loadingMore) return;
+    loadingMore = true;
+    const tip = document.createElement('div'); tip.className = 'item'; tip.id = 'scroll-loading'; tip.textContent = '載入更多中…';
+    if (loaded > 0) list.appendChild(tip);
+    setTimeout(() => {
+      tip.remove();
+      for (let i = 0; i < 10; i++) {
+        loaded++;
+        const d = document.createElement('div');
+        d.className = 'item'; d.dataset.index = loaded; d.textContent = `第 ${loaded} 筆資料`;
+        d.addEventListener('click', () => setResult('scroll-result', '你點擊了：' + d.textContent, 'ok'));
+        list.appendChild(d);
+      }
+      if (loaded >= 50) { const end = document.createElement('div'); end.className = 'item'; end.id = 'no-more'; end.textContent = '沒有更多資料了'; list.appendChild(end); }
+      loadingMore = false;
+    }, loaded === 0 ? 0 : 600);
+  }
+  list.addEventListener('scroll', () => { if (list.scrollTop + list.clientHeight >= list.scrollHeight - 5) loadMore(); });
+  loadMore();
+  $('#btn-back-top').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+  /* ========== 18. 鍵盤 ========== */
+  $('#key-input').addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') return setResult('key-result', '已送出：' + e.target.value, 'ok');
+    setResult('key-result', '你按下了：' + e.key + (e.shiftKey && e.key !== 'Shift' ? '（含 Shift）' : ''));
+  });
+  const cities = ['台北', '台中', '台南', '台東', '新北', '新竹', '高雄', '花蓮'];
+  const acIn = $('#autocomplete-input'), acList = $('#autocomplete-list');
+  let acIdx = -1;
+  const renderAc = () => {
+    const q = acIn.value.trim();
+    const m = q ? cities.filter(c => c.includes(q)) : [];
+    acIdx = -1;
+    acList.innerHTML = m.map(c => `<li class="ac-item" data-value="${c}" style="padding:6px 12px;cursor:pointer;">${c}</li>`).join('');
+    acList.classList.toggle('hidden', !m.length);
+  };
+  const pickAc = (v) => { acIn.value = v; acList.classList.add('hidden'); setResult('key-result', '已選擇城市：' + v, 'ok'); };
+  acIn.addEventListener('input', renderAc);
+  acIn.addEventListener('keydown', e => {
+    const items = $$('.ac-item', acList);
+    if (!items.length || acList.classList.contains('hidden')) return;
+    if (e.key === 'ArrowDown') { e.preventDefault(); acIdx = (acIdx + 1) % items.length; }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); acIdx = (acIdx - 1 + items.length) % items.length; }
+    else if (e.key === 'Enter' && acIdx >= 0) { e.preventDefault(); return pickAc(items[acIdx].dataset.value); }
+    else return;
+    items.forEach((it, i) => { it.style.background = i === acIdx ? '#dbeafe' : ''; it.classList.toggle('active', i === acIdx); });
+  });
+  acList.addEventListener('click', e => { const li = e.target.closest('.ac-item'); if (li) pickAc(li.dataset.value); });
+})();
+</script>
+</body>
+</html>
